@@ -1,0 +1,35 @@
+name: Manual Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch name'
+        required: true
+        default: 'main'
+
+jobs:
+  process_code:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Delete unwanted files and move m1-stub contents
+      run: |
+        # Delete everything outside m1-stub
+        find . -maxdepth 1 ! -name 'm1-stub' -exec rm -r {} \;
+
+        # Move m1-stub contents to the root directory
+        mv m1-stub/* .
+
+        # Delete empty m1-stub folder
+        rmdir m1-stub
+
+    - name: Commit and push changes
+      run: |
+        git add -A
+        git commit -m "Update code structure"
+        git push origin c
